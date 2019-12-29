@@ -1,5 +1,6 @@
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Cats of Jasnah. Teach your 4-year-old logic</title>
 <style>
@@ -340,17 +341,49 @@ const permute_atts = function() {
 	}
 }
 
+const dict = {
+	// en are default texts
+	'hu' : {
+		'US English Female' : 'Hungarian Female',
+		'how many ': 'mennyi ',
+		'not-': 'nem',
+		'ducks' : 'kacsák',
+		'duck' : 'kacsa',
+		'cats are ' : 'macska ',
+		'not ' : 'nem ',
+		' and are ' : ' és ',
+		'cats are here': ' macskát látsz',
+		'That\'s right, ': 'Helyes ',
+		'Good try, but that\'s wrong.': 'Hibás próbálkozás',
+		'red': 'piros',
+		'blue': 'kék',
+		'yellow': 'sárga',
+		'bouncing': 'pattog',
+		'spinning': 'pörög',
+		'ducks': 'kacsa',
+	}
+}
+
+function t(text) {
+    var lang = (navigator.language || navigator.userLanguage).split('-');
+    if (dict[lang[0]]) {
+		return dict[lang[0]][text];
+    } else {
+		return text;
+    }
+}
+
 const speak = function(text, opts) {
 	opts = opts || {}
 	$("p").text(text)
-	responsiveVoice.speak(text, "US English Female", opts)
+	responsiveVoice.speak(text, t("US English Female"), opts)
 }
 
 var make_cats = function() {
 	set_avail_atts()
 	permute_atts()
 	is_reversed = Math.random() < 0.5
-	let text = "how many "
+	let text = t("how many ")
 	const keys = Object.keys(cur_atts)
 	const prefix_pos = get_level_num_adjectives(cur_level, keys)
 	const prefix_keys = keys.slice(0,prefix_pos)
@@ -358,27 +391,27 @@ var make_cats = function() {
 		let prefix_words = []
 		for (let att in prefix_keys) {
 			prefix_words.push(
-				(cur_atts[prefix_keys[att]] ? '' : 'not-')
-				+ prefix_keys[att])
+				(cur_atts[prefix_keys[att]] ? '' : t('not-'))
+				+ t(prefix_keys[att]))
 		}
 		text += prefix_words.join(", ") + " "
 		// ducks is just 'duck' when used as an adjective
-		text = text.replace("ducks", "duck")
+		text = text.replace(t("ducks"), t("duck"))
 	}
 	postfix_keys = keys.slice(prefix_pos)
 	if (postfix_keys.length) {
-		text += "cats are "
+		text += t("cats are ")
 	
 		let conjunctions = []
 		for (let att in postfix_keys) {
 			conjunctions.push(
-				(cur_atts[postfix_keys[att]] ? '' : 'not ')
-				+ postfix_keys[att])
+				(cur_atts[postfix_keys[att]] ? '' : t('not '))
+				+ t(postfix_keys[att]))
 		}
 		console.log(conjunctions)
-		text += conjunctions.join(" and are ")
+		text += conjunctions.join(t(" and are "))
 	} else {
-		text += "cats are here"
+		text += t("cats are here")
 	}
 	text += "?"
 	clue = text;
@@ -424,12 +457,12 @@ const submit = function(value) {
 	
 	console.log('answer:', answer)
 	if (value === answer) {
-		speak("That's right, " + answer, {
+		speak(t("That's right, ") + answer, {
 			onend: function(){
 				make_cats()
 			}})
 	} else {
-		speak("Good try, but that's wrong.", {
+		speak(t("Good try, but that's wrong."), {
 			onend: function() {
 				speak(clue)
 			}
